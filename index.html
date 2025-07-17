@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Horizine Gaming</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="header-container">
+    <img src="image1.jpg" alt="Horizine Gaming Logo" class="logo">
+    <h1>Horizine Gaming Tournament Records</h1>
+  </div>
+
+  <!-- Form to add players -->
+  <form id="addPlayerForm">
+    <input type="text" id="name" placeholder="Player Name" required />
+    <input type="number" id="duration" placeholder="Duration (mins)" min="1" required />
+    <input type="number" id="score" placeholder="Score" min="0" required />
+    <button type="submit">Add Player</button>
+  </form>
+
+  <!-- Player records table -->
+  <table id="recordsTable">
+    <thead>
+      <tr>
+        <th>Player Name</th>
+        <th>Score</th>
+        <th>Duration (mins)</th>
+        <th>Position</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!--Dynamic rows inserted here -->
+    </tbody>
+  </table>
+
+  <!-- Action buttons -->
+  <div>
+    <button onclick="sortByDuration()">Sort by Time Played</button>
+    <button onclick="showTop3Players()">Show Top 3</button>
+    <button onclick="resetTable()">Reset Table</button>
+  </div>
+
+  <script src="scripts.js"></script>
+</body>
+</html>
