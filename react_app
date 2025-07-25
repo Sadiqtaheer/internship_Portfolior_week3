@@ -1,0 +1,162 @@
+import React, { useState, useEffect, Fragment } from 'react';
+import ReactDOM from 'react-dom/client';
+import './styles.css';
+
+// Header Component
+const Header = () => (
+  <div className="header-container">
+    <img src="image1.jpg" alt="Horizine Gaming Logo" className="logo" />
+    <h1>Horizine Gaming Tournament Records</h1>
+  </div>
+);
+
+// PlayerForm Component (Functional)
+const PlayerForm = ({ onAddPlayer }) => {
+  const [name, setName] = useState('');
+  const [score, setScore] = useState('');
+  const [duration, setDuration] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!name || duration <= 0 || score < 0) return;
+    onAddPlayer({ name, score: +score, duration: +duration });
+    setName('');
+    setScore('');
+    setDuration('');
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Player Name" required />
+      <input type="number" value={duration} onChange={(e) => setDuration(e.target.value)} placeholder="Duration (mins)" min="1" required />
+      <input type="number" value={score} onChange={(e) => setScore(e.target.value)} placeholder="Score" min="0" required />
+      <button type="submit">Add Player</button>
+    </form>
+  );
+};
+
+// PlayerRow Component
+const PlayerRow = ({ player, position, onRemove }) => (
+  <tr>
+    <td>{player.name}</td>
+    <td>{player.score.toLocaleString()}</td>
+    <td>{player.duration}</td>
+    <td>{position}</td>
+    <td>
+      <button onClick={() => onRemove(player.id)} style={{ background: 'linear-gradient(135deg, #ff4444, #cc0000)' }}>Remove</button>
+    </td>
+  </tr>
+);
+
+// PlayerTable Component
+class PlayerTable extends React.Component {
+  getPositionDisplay = (index) => {
+    const position = index + 1;
+    const suffix = ['st', 'nd', 'rd'];
+    const v = position % 100;
+    return position + (suffix[(v - 20) % 10] || suffix[v] || 'th');
+  };
+
+  render() {
+    const { players, onRemove } = this.props;
+    if (players.length === 0) {
+      return <p style={{ fontStyle: 'italic', color: '#888' }}>No players found</p>;
+    }
+
+    const sorted = [...players].sort((a, b) => b.score - a.score);
+
+    return (
+      <table id="recordsTable">
+        <thead>
+          <tr>
+            <th>Player Name</th>
+            <th>Score</th>
+            <th>Duration (mins)</th>
+            <th>Position</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.map((player, idx) => (
+            <PlayerRow
+              key={player.id}
+              player={player}
+              position={this.getPositionDisplay(idx)}
+              onRemove={onRemove}
+            />
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+}
+
+// App Component
+const App = () => {
+  const [players, setPlayers] = useState([]);
+  const [originalPlayers, setOriginalPlayers] = useState([]);
+  const [playerIdCounter, setPlayerIdCounter] = useState(6);
+  const [isTop3, setIsTop3] = useState(false);
+
+  useEffect(() => {
+    const sample = [
+      { id: 1, name: 'Steven', score: 450, duration: 45 },
+      { id: 2, name: 'Emanuel', score: 550, duration: 38 },
+      { id: 3, name: 'Evans', score: 350, duration: 52 },
+      { id: 4, name: 'Stella', score: 250, duration: 41 },
+      { id: 5, name: 'David', score: 150, duration: 35 },
+    ];
+    setPlayers(sample);
+    setOriginalPlayers(sample);
+  }, []);
+
+  const addPlayer = ({ name, score, duration }) => {
+    if (players.some((p) => p.name.toLowerCase() === name.toLowerCase())) {
+      alert('Player already exists!');
+      return;
+    }
+    const newPlayer = { id: playerIdCounter, name, score, duration };
+    const updated = [...players, newPlayer];
+    setPlayers(updated);
+    setOriginalPlayers([...originalPlayers, newPlayer]);
+    setPlayerIdCounter(playerIdCounter + 1);
+  };
+
+  const removePlayer = (id) => {
+    const updated = players.filter((p) => p.id !== id);
+    setPlayers(updated);
+    setOriginalPlayers(originalPlayers.filter((p) => p.id !== id));
+  };
+
+  const sortByDuration = () => {
+    if (isTop3) resetTable();
+    setPlayers([...players].sort((a, b) => b.duration - a.duration));
+    setIsTop3(false);
+  };
+
+  const showTop3Players = () => {
+    setPlayers([...players].sort((a, b) => b.score - a.score).slice(0, 3));
+    setIsTop3(true);
+  };
+
+  const resetTable = () => {
+    setPlayers([...originalPlayers]);
+    setIsTop3(false);
+  };
+
+  return (
+    <Fragment>
+      <Header />
+      <PlayerForm onAddPlayer={addPlayer} />
+      <PlayerTable players={players} onRemove={removePlayer} />
+      <div>
+        <button onClick={sortByDuration}>Sort by Time Played</button>
+        <button onClick={showTop3Players}>Show Top 3</button>
+        <button onClick={resetTable}>Reset Table</button>
+      </div>
+    </Fragment>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
